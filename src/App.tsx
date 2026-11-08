@@ -18,6 +18,30 @@ export default function App() {
   const [activeProfile, setActiveProfile] = useState<UserProfile>(PROFILES[0]);
   const [flexibilityScale, setFlexibilityScale] = useState<number>(7); // Scale 1 to 10
 
+  // Dual Theme (Light / Dark) State
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('nl_theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('nl_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   const [studentLogs, setStudentLogs] = useState<WeeklyLogDay[]>(STUDENT_WEEKLY_LOG);
   const [homemakerLogs, setHomemakerLogs] = useState<WeeklyLogDay[]>(HOMEMAKER_WEEKLY_LOG);
 
@@ -75,6 +99,7 @@ export default function App() {
     }
   };
 
+  // Debounced effect to prevent quota burn on range slider drag
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchDriftAnalysis();
@@ -113,13 +138,15 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
-      {/* Top Header */}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
+      {/* Top Header with Dark Mode Toggle */}
       <Header
         activeView={activeTab as any}
         setActiveView={(v) => setActiveTab(v as any)}
         onGeneratePlan={fetchAdaptivePlan}
         isGenerating={isGeneratingPlan}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Workspace Container */}
@@ -141,12 +168,14 @@ export default function App() {
           />
         )}
 
-        {/* View Switcher Bar (Mobile & Desktop) */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+        {/* View Switcher Bar */}
+        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('plan')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'plan' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              activeTab === 'plan' 
+                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
             }`}
           >
             Adaptive Weekly Plan
@@ -155,7 +184,9 @@ export default function App() {
           <button
             onClick={() => setActiveTab('next_meal')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'next_meal' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              activeTab === 'next_meal' 
+                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
             }`}
           >
             What Should I Eat Next? (Pre-Meal Check-in)
@@ -164,7 +195,9 @@ export default function App() {
           <button
             onClick={() => setActiveTab('drift')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'drift' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              activeTab === 'drift' 
+                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
             }`}
           >
             Nutrient Drift & Food Log
@@ -174,7 +207,9 @@ export default function App() {
             <button
               onClick={() => setActiveTab('household')}
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'household' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+                activeTab === 'household' 
+                  ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
               }`}
             >
               Multi-Member Household
@@ -184,7 +219,9 @@ export default function App() {
           <button
             onClick={() => setActiveTab('market')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'market' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              activeTab === 'market' 
+                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
             }`}
           >
             Local Mandi Ingredients
@@ -193,16 +230,20 @@ export default function App() {
           <button
             onClick={() => setActiveTab('master_prompt')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'master_prompt' ? 'bg-blue-700 text-white' : 'text-blue-700 hover:text-blue-900 bg-blue-50 border border-blue-200'
+              activeTab === 'master_prompt' 
+                ? 'bg-blue-700 text-white dark:bg-blue-600 shadow-xs' 
+                : 'text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60'
             }`}
           >
-            ★ Master Prompt & PM Review
+            ★ Master Blueprint & PM Review
           </button>
 
           <button
             onClick={() => setActiveTab('pm_rules')}
             className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'pm_rules' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900 bg-white border border-slate-200'
+              activeTab === 'pm_rules' 
+                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
             }`}
           >
             PM Rule Sandbox
@@ -259,18 +300,20 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer following Top Bar Contract & Anti-Slop Guidelines */}
-      <footer className="border-t border-slate-200 bg-white py-6 mt-16 text-xs text-slate-500">
+      {/* Footer */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 mt-16 text-xs text-slate-500 dark:text-slate-400 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800">NutriLocal Studio</span>
+            <span className="font-bold text-slate-800 dark:text-slate-200">NutriLocal Studio</span>
             <span>·</span>
             <span>Zero Subscription & Zero Ads</span>
             <span>·</span>
             <span>Quick Commerce & Dining Affiliate Supported</span>
           </div>
-          <div>
-            Built for Google AI Studio · Production PM Framework
+          <div className="flex items-center gap-2">
+            <span>Theme: <strong className="capitalize text-slate-800 dark:text-slate-200">{theme}</strong></span>
+            <span>·</span>
+            <span>Production PM Framework</span>
           </div>
         </div>
       </footer>

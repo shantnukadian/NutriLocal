@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Copy, Check, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export const MasterPromptView: React.FC = () => {
   const [copyStatus, setCopyStatus] = useState<string>('');
@@ -30,35 +31,35 @@ export const MasterPromptView: React.FC = () => {
 
   const handleCopy = () => {
     navigator.clipboard.writeText(masterPromptText);
-    setCopyStatus('Master Prompt copied to clipboard!');
+    setCopyStatus('Copied to clipboard!');
     setTimeout(() => setCopyStatus(''), 2500);
   };
 
   return (
     <div className="space-y-8">
       {/* Editorial Header */}
-      <div className="border-b border-slate-200 pb-6">
-        <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-6">
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-1">
           <span>Product Management Specification</span>
           <span aria-hidden="true">·</span>
           <span>Google AI Studio Master Blueprint</span>
           <span aria-hidden="true">·</span>
           <span>Comprehensive Prompt & Review</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
           Master Build Prompt & Architectural Audit
         </h1>
-        <p className="mt-2 text-sm text-slate-600 max-w-3xl leading-relaxed">
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
           Below is the consolidated, unified master prompt incorporating all operational rules, system constraints, and technical architecture—paired with a rigorous Product Manager review analyzing edge cases, contradictions, and alignment with your original mission.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
         <button
           onClick={() => setActiveTab('prompt')}
           className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-            activeTab === 'prompt' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+            activeTab === 'prompt' ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-100'
           }`}
         >
           Master Executable Prompt
@@ -66,7 +67,7 @@ export const MasterPromptView: React.FC = () => {
         <button
           onClick={() => setActiveTab('audit')}
           className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-            activeTab === 'audit' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+            activeTab === 'audit' ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-100'
           }`}
         >
           PM Review: Gap & Contradiction Audit
@@ -74,7 +75,7 @@ export const MasterPromptView: React.FC = () => {
         <button
           onClick={() => setActiveTab('architecture')}
           className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
-            activeTab === 'architecture' ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200'
+            activeTab === 'architecture' ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-100'
           }`}
         >
           AI Studio Architecture Table
@@ -83,31 +84,31 @@ export const MasterPromptView: React.FC = () => {
 
       {/* Tab 1: The Master Prompt */}
       {activeTab === 'prompt' && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 space-y-4 shadow-xs">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <div>
-              <h2 className="text-base font-bold text-slate-900">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white">
                 Consolidated Google AI Studio Build Prompt
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 Ready to copy and execute directly into Google AI Studio Build.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               {copyStatus && (
-                <span className="text-xs text-emerald-700 font-semibold">{copyStatus}</span>
+                <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">{copyStatus}</span>
               )}
               <button
                 onClick={handleCopy}
-                className="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
+                className="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 rounded-lg transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1.5"
               >
-                Copy Master Prompt
+                <Copy className="w-3.5 h-3.5" /> Copy Master Prompt
               </button>
             </div>
           </div>
 
-          <div className="bg-slate-900 text-slate-200 p-5 rounded-lg font-mono text-xs overflow-x-auto max-h-[500px] leading-relaxed">
+          <div className="bg-slate-900 dark:bg-slate-950 text-slate-200 p-5 rounded-lg font-mono text-xs overflow-x-auto max-h-[500px] leading-relaxed border border-slate-800">
             <pre className="whitespace-pre-wrap">{masterPromptText}</pre>
           </div>
         </div>
@@ -116,46 +117,46 @@ export const MasterPromptView: React.FC = () => {
       {/* Tab 2: PM Review & Critical Audit */}
       {activeTab === 'audit' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-6">
-            <div className="border-b border-slate-200 pb-4">
-              <span className="text-xs font-bold text-blue-700 uppercase tracking-wide block mb-1">
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs">
+            <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
+              <span className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wide block mb-1">
                 Product Review Report
               </span>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 Critical Evaluation Against Your Original Problem Statement
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Audited against: <em>"Assisting hostel students and homemakers in maintaining a healthy lifestyle with local ingredients without rigid restrictions."</em>
               </p>
             </div>
 
-            <div className="space-y-6 text-xs text-slate-700">
+            <div className="space-y-6 text-xs text-slate-700 dark:text-slate-300">
               {/* Check 1: Does it solve the original problem? */}
-              <div className="p-4 rounded-lg bg-emerald-50/70 border border-emerald-200 space-y-1.5">
+              <div className="p-4 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-emerald-950">
+                  <h3 className="text-sm font-bold text-emerald-950 dark:text-emerald-200">
                     1. Core Alignment: Does it solve the problem you started with?
                   </h3>
-                  <span className="text-[10px] font-mono font-bold text-emerald-800 bg-white px-2 py-0.5 rounded border border-emerald-200">
+                  <span className="text-[10px] font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-white dark:bg-slate-900 px-2.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
                     VERIFIED · 100% ALIGNED
                   </span>
                 </div>
-                <p className="text-emerald-900 leading-relaxed">
+                <p className="text-emerald-900 dark:text-emerald-200/90 leading-relaxed">
                   Yes, with exceptional specificity. Most nutrition apps fail for hostel students and homemakers because they assume individual meal cooking, expensive superfoods (avocado, quinoa, salmon), and full kitchens. By grounding the AI in <strong>hostel equipment (kettles/induction)</strong>, <strong>local mandi staples (Sattu, Kala Chana, Curd, Peanuts)</strong>, and <strong>zero-waste family batch cooking ("Cook Once, Adapt for Four")</strong>, the prompt directly solves your primary recurring problem.
                 </p>
               </div>
 
               {/* Check 2: Potential Contradictions Checked */}
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+              <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                     2. Contradiction Analysis: Were there conflicting requirements?
                   </h3>
-                  <span className="text-[10px] font-mono font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                  <span className="text-[10px] font-mono font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
                     RESOLVED
                   </span>
                 </div>
-                <ul className="space-y-2 text-slate-600 list-disc pl-4">
+                <ul className="space-y-2 text-slate-600 dark:text-slate-300 list-disc pl-4">
                   <li>
                     <strong>"Zero Restrictions" vs. "Mandatory Pre-Meal Check-in":</strong> Users hate tedious food logging. We resolved this by providing <strong>1-tap quick presets</strong> (e.g. "Mess Thali", "Samosa & Chai", "Skipped") instead of requiring gram-by-gram weighing.
                   </li>
@@ -169,22 +170,22 @@ export const MasterPromptView: React.FC = () => {
               </div>
 
               {/* Check 3: What was missing that we added? */}
-              <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+              <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                     3. Gaps Filled: Key Enhancements Injected from the Specification PDF
                   </h3>
-                  <span className="text-[10px] font-mono font-bold text-blue-700 bg-white px-2 py-0.5 rounded border border-blue-200">
+                  <span className="text-[10px] font-mono font-bold text-blue-700 dark:text-blue-400 bg-white dark:bg-slate-900 px-2.5 py-0.5 rounded border border-blue-200 dark:border-blue-700">
                     ENHANCED
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-600">
-                  <div className="p-3 bg-white rounded border border-slate-200">
-                    <span className="font-bold text-slate-800 block mb-1">Dual Market Triangulation</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-600 dark:text-slate-300">
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block mb-1">Dual Market Triangulation</span>
                     <p className="text-[11px]">Gives every meal both a DIY 10-min grocery option (Blinkit) AND a delivered regional canteen/dhaba option (Swiggy).</p>
                   </div>
-                  <div className="p-3 bg-white rounded border border-slate-200">
-                    <span className="font-bold text-slate-800 block mb-1">14-Day Deficit Supplement Trigger</span>
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded border border-slate-200 dark:border-slate-700">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 block mb-1">14-Day Deficit Supplement Trigger</span>
                     <p className="text-[11px]">Prevents dangerous chronic micro-nutrient gaps (B12, Vitamin D, Protein) by suggesting affordable generic Indian supplements when deficits persist past 14 days.</p>
                   </div>
                 </div>
@@ -196,12 +197,12 @@ export const MasterPromptView: React.FC = () => {
 
       {/* Tab 3: Technical Architecture Specification Table */}
       {activeTab === 'architecture' && (
-        <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 space-y-5">
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 space-y-5 shadow-xs">
           <div>
-            <h2 className="text-base font-bold text-slate-900">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">
               Technical & AI Studio Architecture Matrix
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Exact component specifications and engineering rationales from the PDF blueprint.
             </p>
           </div>
@@ -209,32 +210,32 @@ export const MasterPromptView: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-500 font-semibold">
+                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold">
                   <th className="py-3 pr-4">Component</th>
                   <th className="py-3 px-4">Specification</th>
                   <th className="py-3 pl-4">Engineering Rationale</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
                 <tr>
-                  <td className="py-3.5 pr-4 font-bold text-slate-900">Core Model</td>
-                  <td className="py-3.5 px-4 font-mono text-emerald-800 font-semibold">Gemini 3.8 Flash (gemini-3.8-flash)</td>
-                  <td className="py-3.5 pl-4 text-slate-600">Low latency, cost-effective, high reasoning, massive context window.</td>
+                  <td className="py-3.5 pr-4 font-bold text-slate-900 dark:text-white">Core Model</td>
+                  <td className="py-3.5 px-4 font-mono text-emerald-800 dark:text-emerald-400 font-semibold">Gemini 3.8 Flash (gemini-3.8-flash)</td>
+                  <td className="py-3.5 pl-4 text-slate-600 dark:text-slate-300">Low latency, cost-effective, high reasoning, massive context window.</td>
                 </tr>
                 <tr>
-                  <td className="py-3.5 pr-4 font-bold text-slate-900">State Management</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-700">Dynamic 7-Day Context Injection</td>
-                  <td className="py-3.5 pl-4 text-slate-600">Replaces complex fine-tunes; dynamically feeds weekly food logs into active system prompts.</td>
+                  <td className="py-3.5 pr-4 font-bold text-slate-900 dark:text-white">State Management</td>
+                  <td className="py-3.5 px-4 font-mono text-slate-700 dark:text-slate-300">Dynamic 7-Day Context Injection</td>
+                  <td className="py-3.5 pl-4 text-slate-600 dark:text-slate-300">Replaces complex fine-tunes; dynamically feeds weekly food logs into active system prompts.</td>
                 </tr>
                 <tr>
-                  <td className="py-3.5 pr-4 font-bold text-slate-900">Data Scraper Pipeline</td>
-                  <td className="py-3.5 px-4 font-mono text-slate-700">Offline Regional Scrapes</td>
-                  <td className="py-3.5 pl-4 text-slate-600">Pre-fetches city-wise mandi prices to avoid latency or rate limits during meal planning.</td>
+                  <td className="py-3.5 pr-4 font-bold text-slate-900 dark:text-white">Data Scraper Pipeline</td>
+                  <td className="py-3.5 px-4 font-mono text-slate-700 dark:text-slate-300">Offline Regional Scrapes</td>
+                  <td className="py-3.5 pl-4 text-slate-600 dark:text-slate-300">Pre-fetches city-wise mandi prices to avoid latency or rate limits during meal planning.</td>
                 </tr>
                 <tr>
-                  <td className="py-3.5 pr-4 font-bold text-slate-900">Monetization Engine</td>
-                  <td className="py-3.5 px-4 font-mono text-blue-700">Quick Commerce & Dining Affiliates</td>
-                  <td className="py-3.5 pl-4 text-slate-600">Keeps product 100% free and ad-free for students while generating sustainable revenue via Blinkit/Zepto/Swiggy.</td>
+                  <td className="py-3.5 pr-4 font-bold text-slate-900 dark:text-white">Monetization Engine</td>
+                  <td className="py-3.5 px-4 font-mono text-blue-700 dark:text-blue-400">Quick Commerce & Dining Affiliates</td>
+                  <td className="py-3.5 pl-4 text-slate-600 dark:text-slate-300">Keeps product 100% free and ad-free for students while generating sustainable revenue via Blinkit/Zepto/Swiggy.</td>
                 </tr>
               </tbody>
             </table>

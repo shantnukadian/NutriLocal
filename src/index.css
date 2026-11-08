@@ -6,6 +6,12 @@
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     color: #0f172a;
     background-color: #f8fafc;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+  
+  .dark body {
+    color: #f1f5f9;
+    background-color: #020617;
   }
   
   .font-mono, [class*="font-mono"] {
