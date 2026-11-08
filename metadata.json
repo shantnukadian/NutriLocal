@@ -1,0 +1,6 @@
+{
+  "name": "NutriLogic Studio - AI Meal Planning PM Workbench",
+  "description": "Product Manager workbench for aggregating fragmented user dietary patterns and configuring dynamic AI meal-planning logic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
