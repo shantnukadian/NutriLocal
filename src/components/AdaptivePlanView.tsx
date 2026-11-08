@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Utensils, Check, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Utensils, Check, ArrowRight, Sparkles, ChefHat } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { UserProfile, AdaptiveMealPlan, FoodLogItem } from '../types';
 
 interface AdaptivePlanViewProps {
@@ -16,6 +17,7 @@ export const AdaptivePlanView: React.FC<AdaptivePlanViewProps> = ({
   flexibilityScale,
 }) => {
   const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0);
+  const [activeSubTab, setActiveSubTab] = useState<'meals' | 'market' | 'hacks'>('meals');
   const [loggedAlert, setLoggedAlert] = useState<string>('');
 
   const activeDay = plan.days[selectedDayIndex] || plan.days[0];
@@ -31,308 +33,285 @@ export const AdaptivePlanView: React.FC<AdaptivePlanViewProps> = ({
       fat: Math.round(cal * 0.03)
     });
 
-    setLoggedAlert(`Logged "${name}" as eaten!`);
+    setLoggedAlert(`Logged "${name}" for ${activeDay.dayName}!`);
     setTimeout(() => setLoggedAlert(''), 2500);
   };
 
+  const dayMeals = [
+    { type: 'Breakfast' as const, data: activeDay.breakfast },
+    { type: 'Lunch' as const, data: activeDay.lunch },
+    { type: 'Dinner' as const, data: activeDay.dinner },
+    { type: 'Late Snack' as const, data: activeDay.snack },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Editorial Header */}
-      <div className="border-b border-slate-200 dark:border-slate-800 pb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-1">
-            <span>Adaptive Nutrition Engine</span>
-            <span aria-hidden="true">·</span>
-            <span>Local Market Ingredients</span>
-            <span aria-hidden="true">·</span>
-            <span className="font-mono text-emerald-700 dark:text-emerald-400 font-semibold">Flexibility Score {flexibilityScale}/10</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-            Hyper-Localized Adaptive Weekly Plan
-          </h1>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-            {plan.planOverview}
-          </p>
+    <div className="h-full flex flex-col space-y-3 overflow-hidden">
+      {/* Plan Control Header (Single Row with Days & Sub-tabs) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
+        {/* Day Selector Buttons */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
+          {plan.days.map((day, idx) => {
+            const isSelected = selectedDayIndex === idx;
+            return (
+              <button
+                key={day.dayName}
+                onClick={() => setSelectedDayIndex(idx)}
+                className={`relative px-3 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap cursor-pointer ${
+                  isSelected
+                    ? 'text-white'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800'
+                }`}
+              >
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeDayPill"
+                    className="absolute inset-0 bg-slate-900 dark:bg-emerald-600 rounded-md shadow-xs -z-10"
+                    transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                  />
+                )}
+                <span>{day.dayName.slice(0, 3)}</span>
+              </button>
+            );
+          })}
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-right shrink-0 shadow-xs">
-          <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Est. Weekly Grocery Cost</span>
-          <span className="text-xl font-bold text-slate-900 dark:text-white font-mono tabular-nums">
-            ₹{plan.weeklyBudgetEstimateINR}
-          </span>
-          <span className="text-[11px] text-emerald-700 dark:text-emerald-400 block font-medium">Affordable local staples</span>
-        </div>
-      </div>
-
-      {/* Zero Subscription / Zero Ads Transparency Notice */}
-      <div className="p-3.5 bg-slate-100/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-700 dark:text-slate-300 gap-2">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-900 dark:text-white">Zero Subscription & Zero Ads:</span>
-          <span>100% free for students & families. Supported via quick commerce & dining affiliate links.</span>
-        </div>
-        <div className="flex items-center gap-2 font-medium text-slate-800 dark:text-slate-200 text-[11px]">
-          <span>Quick Commerce: Blinkit · Zepto · Instamart</span>
-          <span>·</span>
-          <span>Dining: Swiggy · Zomato</span>
+        {/* Section View Tabs */}
+        <div className="flex items-center gap-1 p-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0">
+          <button
+            onClick={() => setActiveSubTab('meals')}
+            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'meals'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            Meal Schedule
+          </button>
+          <button
+            onClick={() => setActiveSubTab('market')}
+            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'market'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            Dual Market
+          </button>
+          <button
+            onClick={() => setActiveSubTab('hacks')}
+            className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'hacks'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            }`}
+          >
+            Zero-Waste Hacks
+          </button>
         </div>
       </div>
 
       {/* Logged feedback toast */}
       {loggedAlert && (
-        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
-          <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> {loggedAlert}</span>
-          <span className="text-[11px] text-emerald-600 dark:text-emerald-400">Nutrient drift automatically recalculated</span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="p-2 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 rounded-lg text-xs font-medium text-emerald-800 dark:text-emerald-300 flex items-center justify-between shrink-0"
+        >
+          <span className="flex items-center gap-1.5">
+            <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+            {loggedAlert}
+          </span>
+          <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">Nutrient drift updated</span>
+        </motion.div>
       )}
 
-      {/* Day Selector Buttons */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-3 overflow-x-auto">
-        {plan.days.map((day, idx) => (
-          <button
-            key={day.dayName}
-            onClick={() => setSelectedDayIndex(idx)}
-            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              selectedDayIndex === idx
-                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs'
-                : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800 dark:hover:text-slate-100'
-            }`}
-          >
-            {day.dayName}
-          </button>
-        ))}
-      </div>
-
-      {/* Day Meals Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Breakfast */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between space-y-4 shadow-xs">
-          <div>
-            <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-1.5">
-              <span className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Breakfast</span>
-              <span className="font-mono text-slate-500 dark:text-slate-400">{activeDay.breakfast.prepTime}</span>
-            </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
-              {activeDay.breakfast.name}
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
-              {activeDay.breakfast.description}
-            </p>
-
-            <div className="text-[11px] text-emerald-800 dark:text-emerald-300 font-medium bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 p-2.5 rounded-lg mb-3">
-              <strong>Practicality:</strong> {activeDay.breakfast.practicalityTip}
-            </div>
-
-            {/* Dual Market Triangulation Details */}
-            {activeDay.breakfast.dualMarket && (
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 space-y-2 text-xs">
-                <span className="font-medium text-slate-500 dark:text-slate-400 block text-[11px]">Dual Market Triangulation:</span>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-blue-700 dark:text-blue-400 font-bold">
-                      <ShoppingBag className="w-3 h-3" /> Quick Commerce
+      {/* Content Container with Animation */}
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1">
+        <AnimatePresence mode="wait">
+          {/* TAB 1: 4-MEAL VIEWPORT-FITTED GRID */}
+          {activeSubTab === 'meals' && (
+            <motion.div
+              key={`meals-${selectedDayIndex}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.16 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-3.5"
+            >
+              {dayMeals.map((meal) => (
+                <div
+                  key={meal.type}
+                  className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between space-y-2.5 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                >
+                  <div>
+                    <div className="flex justify-between items-center text-[11px] text-slate-500 dark:text-slate-400 mb-1">
+                      <span className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                        {meal.type}
+                      </span>
+                      <span className="font-mono text-slate-400 dark:text-slate-500">{meal.data.prepTime}</span>
                     </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.breakfast.dualMarket.rawIngredientsOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.breakfast.dualMarket.rawIngredientsOption.costEstimateINR} · {activeDay.breakfast.dualMarket.rawIngredientsOption.platform}</span>
+
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white leading-snug">
+                      {meal.data.name}
+                    </h3>
+
+                    <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 mt-1 leading-relaxed">
+                      {meal.data.description}
+                    </p>
+
+                    <div className="mt-2 text-[11px] text-emerald-800 dark:text-emerald-300 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 px-2.5 py-1.5 rounded-lg line-clamp-1">
+                      <strong>Tip:</strong> {meal.data.practicalityTip}
+                    </div>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
-                      <Utensils className="w-3 h-3" /> Regional Dining
+
+                  {/* Card Bottom: Tabular Macros + Log Action */}
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <div className="font-mono tabular-nums text-slate-600 dark:text-slate-400">
+                      <strong className="text-slate-900 dark:text-white">{meal.data.calories} kcal</strong>
+                      <span> · </span>
+                      <strong className="text-emerald-700 dark:text-emerald-400">{meal.data.proteinG}g P</strong>
                     </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.breakfast.dualMarket.restaurantOrMessOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.breakfast.dualMarket.restaurantOrMessOption.costEstimateINR} · {activeDay.breakfast.dualMarket.restaurantOrMessOption.platform}</span>
+
+                    <button
+                      onClick={() => handleQuickLogFromPlan(meal.type, meal.data.name, meal.data.calories, meal.data.proteinG)}
+                      className="px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md transition-colors cursor-pointer"
+                    >
+                      Log as Eaten
+                    </button>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+              ))}
+            </motion.div>
+          )}
 
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <div className="font-mono text-slate-600 dark:text-slate-400 tabular-nums">
-              <strong className="text-slate-900 dark:text-white">{activeDay.breakfast.calories} kcal</strong> · <strong className="text-emerald-700 dark:text-emerald-400">{activeDay.breakfast.proteinG}g Protein</strong>
-            </div>
-            <button
-              onClick={() => handleQuickLogFromPlan('Breakfast', activeDay.breakfast.name, activeDay.breakfast.calories, activeDay.breakfast.proteinG)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
+          {/* TAB 2: DUAL MARKET TRIANGULATION COMPARISON */}
+          {activeSubTab === 'market' && (
+            <motion.div
+              key={`market-${selectedDayIndex}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.16 }}
+              className="space-y-3"
             >
-              Log as Eaten
-            </button>
-          </div>
-        </div>
+              <div className="p-3 bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-lg text-xs text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                <span>
+                  <strong>Dual Market Triangulation:</strong> Grounding every meal in 10-minute grocery delivery vs. regional dining.
+                </span>
+                <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">100% Free · Affiliate Supported</span>
+              </div>
 
-        {/* Lunch */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between space-y-4 shadow-xs">
-          <div>
-            <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-1.5">
-              <span className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Lunch</span>
-              <span className="font-mono text-slate-500 dark:text-slate-400">{activeDay.lunch.prepTime}</span>
-            </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
-              {activeDay.lunch.name}
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
-              {activeDay.lunch.description}
-            </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {dayMeals.map((meal) => {
+                  const dm = meal.data.dualMarket;
+                  if (!dm) return null;
+                  return (
+                    <div
+                      key={`dm-${meal.type}`}
+                      className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 space-y-3 shadow-xs"
+                    >
+                      <div className="flex justify-between items-center text-xs border-b border-slate-100 dark:border-slate-800 pb-2">
+                        <span className="font-bold text-slate-900 dark:text-white uppercase">{meal.type}</span>
+                        <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{meal.data.name}</span>
+                      </div>
 
-            <div className="text-[11px] text-emerald-800 dark:text-emerald-300 font-medium bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 p-2.5 rounded-lg mb-3">
-              <strong>Practicality:</strong> {activeDay.lunch.practicalityTip}
-            </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {/* Quick Commerce */}
+                        <div className="p-2.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 flex flex-col justify-between space-y-2">
+                          <div>
+                            <div className="flex items-center gap-1 text-blue-700 dark:text-blue-400 font-bold text-[11px]">
+                              <ShoppingBag className="w-3 h-3" /> Quick Commerce (10m)
+                            </div>
+                            <span className="text-slate-900 dark:text-slate-100 font-medium block text-xs mt-1">
+                              {dm.rawIngredientsOption.dishName}
+                            </span>
+                            <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block mt-0.5">
+                              ₹{dm.rawIngredientsOption.costEstimateINR} · {dm.rawIngredientsOption.platform}
+                            </span>
+                          </div>
 
-            {/* Dual Market Triangulation Details */}
-            {activeDay.lunch.dualMarket && (
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 space-y-2 text-xs">
-                <span className="font-medium text-slate-500 dark:text-slate-400 block text-[11px]">Dual Market Triangulation:</span>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-blue-700 dark:text-blue-400 font-bold">
-                      <ShoppingBag className="w-3 h-3" /> Quick Commerce
+                          <a
+                            href={`https://${dm.rawIngredientsOption.platform.toLowerCase()}.com`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-center py-1 text-[11px] font-semibold text-white bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 rounded transition-colors"
+                          >
+                            Order Ingredients →
+                          </a>
+                        </div>
+
+                        {/* Regional Dining */}
+                        <div className="p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 flex flex-col justify-between space-y-2">
+                          <div>
+                            <div className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold text-[11px]">
+                              <Utensils className="w-3 h-3" /> Regional Dining
+                            </div>
+                            <span className="text-slate-900 dark:text-slate-100 font-medium block text-xs mt-1">
+                              {dm.restaurantOrMessOption.dishName}
+                            </span>
+                            <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px] block mt-0.5">
+                              ₹{dm.restaurantOrMessOption.costEstimateINR} · {dm.restaurantOrMessOption.platform}
+                            </span>
+                          </div>
+
+                          <a
+                            href="https://swiggy.com"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-center py-1 text-[11px] font-semibold text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-500 rounded transition-colors"
+                          >
+                            Order Food →
+                          </a>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.lunch.dualMarket.rawIngredientsOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.lunch.dualMarket.rawIngredientsOption.costEstimateINR} · {activeDay.lunch.dualMarket.rawIngredientsOption.platform}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
-                      <Utensils className="w-3 h-3" /> Regional Dining
-                    </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.lunch.dualMarket.restaurantOrMessOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.lunch.dualMarket.restaurantOrMessOption.costEstimateINR} · {activeDay.lunch.dualMarket.restaurantOrMessOption.platform}</span>
-                  </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {/* TAB 3: ZERO-WASTE & PANTRY HACKS */}
+          {activeSubTab === 'hacks' && (
+            <motion.div
+              key={`hacks-${selectedDayIndex}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.16 }}
+              className="space-y-4"
+            >
+              <div className="p-5 rounded-xl bg-slate-900 dark:bg-slate-800 text-white border border-slate-800 dark:border-slate-700 space-y-2 shadow-xs">
+                <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono font-semibold">
+                  <ChefHat className="w-4 h-4" />
+                  <span>{activeDay.dayName} Zero-Waste & Prep Hack</span>
+                </div>
+                <p className="text-sm font-medium text-slate-100 leading-relaxed">
+                  {activeDay.leftoverOrPrepHack}
+                </p>
+                <div className="pt-2 text-xs text-slate-400 font-mono">
+                  Weekly Grocery Budget Estimate: <strong className="text-white">₹{plan.weeklyBudgetEstimateINR}</strong>
                 </div>
               </div>
-            )}
-          </div>
 
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <div className="font-mono text-slate-600 dark:text-slate-400 tabular-nums">
-              <strong className="text-slate-900 dark:text-white">{activeDay.lunch.calories} kcal</strong> · <strong className="text-emerald-700 dark:text-emerald-400">{activeDay.lunch.proteinG}g Protein</strong>
-            </div>
-            <button
-              onClick={() => handleQuickLogFromPlan('Lunch', activeDay.lunch.name, activeDay.lunch.calories, activeDay.lunch.proteinG)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
-            >
-              Log as Eaten
-            </button>
-          </div>
-        </div>
-
-        {/* Dinner */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between space-y-4 shadow-xs">
-          <div>
-            <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-1.5">
-              <span className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Dinner</span>
-              <span className="font-mono text-slate-500 dark:text-slate-400">{activeDay.dinner.prepTime}</span>
-            </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
-              {activeDay.dinner.name}
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
-              {activeDay.dinner.description}
-            </p>
-
-            <div className="text-[11px] text-emerald-800 dark:text-emerald-300 font-medium bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 p-2.5 rounded-lg mb-3">
-              <strong>Practicality:</strong> {activeDay.dinner.practicalityTip}
-            </div>
-
-            {/* Dual Market Triangulation Details */}
-            {activeDay.dinner.dualMarket && (
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 space-y-2 text-xs">
-                <span className="font-medium text-slate-500 dark:text-slate-400 block text-[11px]">Dual Market Triangulation:</span>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-blue-700 dark:text-blue-400 font-bold">
-                      <ShoppingBag className="w-3 h-3" /> Quick Commerce
-                    </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.dinner.dualMarket.rawIngredientsOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.dinner.dualMarket.rawIngredientsOption.costEstimateINR} · {activeDay.dinner.dualMarket.rawIngredientsOption.platform}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
-                      <Utensils className="w-3 h-3" /> Regional Dining
-                    </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.dinner.dualMarket.restaurantOrMessOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.dinner.dualMarket.restaurantOrMessOption.costEstimateINR} · {activeDay.dinner.dualMarket.restaurantOrMessOption.platform}</span>
-                  </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
+                  <span className="font-bold text-slate-900 dark:text-white block">Hostel Electric Kettle Cooking</span>
+                  <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                    0.8L kettle safely cooks 2-3 eggs, Maggi protein twists, and steamed sprouted moong. Never fry or add oil inside kettle heating coils.
+                  </p>
+                </div>
+                <div className="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 shadow-xs">
+                  <span className="font-bold text-slate-900 dark:text-white block">Homemaker Modular Cooker Base</span>
+                  <p className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+                    Pressure cook a double batch of plain dal/chana. Divide into 2 bowls before tadka to create a mild low-GI bowl for elders and a spicy one for kids.
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
-
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <div className="font-mono text-slate-600 dark:text-slate-400 tabular-nums">
-              <strong className="text-slate-900 dark:text-white">{activeDay.dinner.calories} kcal</strong> · <strong className="text-emerald-700 dark:text-emerald-400">{activeDay.dinner.proteinG}g Protein</strong>
-            </div>
-            <button
-              onClick={() => handleQuickLogFromPlan('Dinner', activeDay.dinner.name, activeDay.dinner.calories, activeDay.dinner.proteinG)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
-            >
-              Log as Eaten
-            </button>
-          </div>
-        </div>
-
-        {/* Snack */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-5 flex flex-col justify-between space-y-4 shadow-xs">
-          <div>
-            <div className="flex justify-between items-center text-xs text-slate-500 dark:text-slate-400 mb-1.5">
-              <span className="font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">Late Snack / Study Fuel</span>
-              <span className="font-mono text-slate-500 dark:text-slate-400">{activeDay.snack.prepTime}</span>
-            </div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
-              {activeDay.snack.name}
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
-              {activeDay.snack.description}
-            </p>
-
-            <div className="text-[11px] text-emerald-800 dark:text-emerald-300 font-medium bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/40 p-2.5 rounded-lg mb-3">
-              <strong>Practicality:</strong> {activeDay.snack.practicalityTip}
-            </div>
-
-            {/* Dual Market Triangulation Details */}
-            {activeDay.snack.dualMarket && (
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 space-y-2 text-xs">
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 rounded-lg bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-blue-700 dark:text-blue-400 font-bold">
-                      <ShoppingBag className="w-3 h-3" /> Quick Commerce
-                    </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.snack.dualMarket.rawIngredientsOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.snack.dualMarket.rawIngredientsOption.costEstimateINR} · {activeDay.snack.dualMarket.rawIngredientsOption.platform}</span>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/60 space-y-1">
-                    <div className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-bold">
-                      <Utensils className="w-3 h-3" /> Regional Dining
-                    </div>
-                    <span className="text-slate-900 dark:text-slate-100 font-medium block">{activeDay.snack.dualMarket.restaurantOrMessOption.dishName}</span>
-                    <span className="text-slate-500 dark:text-slate-400 font-mono text-[10px]">₹{activeDay.snack.dualMarket.restaurantOrMessOption.costEstimateINR} · {activeDay.snack.dualMarket.restaurantOrMessOption.platform}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-            <div className="font-mono text-slate-600 dark:text-slate-400 tabular-nums">
-              <strong className="text-slate-900 dark:text-white">{activeDay.snack.calories} kcal</strong> · <strong className="text-emerald-700 dark:text-emerald-400">{activeDay.snack.proteinG}g Protein</strong>
-            </div>
-            <button
-              onClick={() => handleQuickLogFromPlan('Late Snack', activeDay.snack.name, activeDay.snack.calories, activeDay.snack.proteinG)}
-              className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer"
-            >
-              Log as Eaten
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Leftover & PrepHack Strip */}
-      <div className="p-4 rounded-xl bg-slate-900 dark:bg-slate-800/90 text-white border border-slate-800 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs">
-        <div>
-          <span className="text-emerald-400 block text-[11px] font-mono font-semibold">Practical Living & Zero-Waste Hack:</span>
-          <span className="font-medium text-slate-100">{activeDay.leftoverOrPrepHack}</span>
-        </div>
-        <span className="text-slate-400 font-mono text-[11px] shrink-0">
-          Day {selectedDayIndex + 1} of 7
-        </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

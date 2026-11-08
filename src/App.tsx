@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Header } from './components/Header';
 import { ProfileBar } from './components/ProfileBar';
 import { AdaptivePlanView } from './components/AdaptivePlanView';
 import { PreMealCheckinView } from './components/PreMealCheckinView';
 import { NutrientDriftPanel } from './components/NutrientDriftPanel';
-import { HouseholdManagerView } from './components/HouseholdManagerView';
-import { LocalMarketBoard } from './components/LocalMarketBoard';
-import { SupplementTriggerCard } from './components/SupplementTriggerCard';
-import { MasterPromptView } from './components/MasterPromptView';
-import { PMRulesSandbox } from './components/PMRulesSandbox';
+import { HouseholdMandiView } from './components/HouseholdMandiView';
+import { PMBlueprintWorkbenchView } from './components/PMBlueprintWorkbenchView';
 import { PROFILES, STUDENT_WEEKLY_LOG, HOMEMAKER_WEEKLY_LOG } from './data/mockData';
-import { UserProfile, WeeklyLogDay, NutrientDriftAnalysis, AdaptiveMealPlan, FoodLogItem } from './types';
+import { UserProfile, WeeklyLogDay, NutrientDriftAnalysis, AdaptiveMealPlan, FoodLogItem, AppView } from './types';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'plan' | 'next_meal' | 'drift' | 'household' | 'market' | 'master_prompt' | 'pm_rules'>('plan');
+  const [activeTab, setActiveTab] = useState<AppView>('plan');
   const [profiles] = useState<UserProfile[]>(PROFILES);
   const [activeProfile, setActiveProfile] = useState<UserProfile>(PROFILES[0]);
   const [flexibilityScale, setFlexibilityScale] = useState<number>(7); // Scale 1 to 10
@@ -138,20 +136,21 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
-      {/* Top Header with Dark Mode Toggle */}
+    <div className="lg:h-screen min-h-screen flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors overflow-x-hidden lg:overflow-hidden">
+      {/* Top Header with Dark Mode Toggle & Primary Nav Tabs */}
       <Header
-        activeView={activeTab as any}
-        setActiveView={(v) => setActiveTab(v as any)}
+        activeView={activeTab}
+        setActiveView={setActiveTab}
         onGeneratePlan={fetchAdaptivePlan}
         isGenerating={isGeneratingPlan}
         theme={theme}
         onToggleTheme={toggleTheme}
+        hasSupplementTrigger={Boolean(driftAnalysis?.supplementTriggerActive)}
       />
 
-      {/* Main Workspace Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Profile Switcher & Flexibility Scale Bar */}
+      {/* Main Workspace Frame */}
+      <div className="flex-1 min-h-0 flex flex-col max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3.5 space-y-2.5 overflow-hidden">
+        {/* Compact Sub-Header Toolbar: Profile Switcher & Flexibility Scale Bar */}
         <ProfileBar
           profiles={profiles}
           activeProfile={activeProfile}
@@ -160,163 +159,78 @@ export default function App() {
           onChangeFlexibility={setFlexibilityScale}
         />
 
-        {/* 14-Day Persistent Deficit Supplement Trigger Banner */}
-        {driftAnalysis?.supplementTriggerActive && (
-          <SupplementTriggerCard
-            recommendations={driftAnalysis.supplementRecommendations}
-            deficiencyDays={driftAnalysis.deficiencyDaysCount}
-          />
-        )}
-
-        {/* View Switcher Bar */}
-        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
-          <button
-            onClick={() => setActiveTab('plan')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'plan' 
-                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
-            }`}
-          >
-            Adaptive Weekly Plan
-          </button>
-
-          <button
-            onClick={() => setActiveTab('next_meal')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'next_meal' 
-                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
-            }`}
-          >
-            What Should I Eat Next? (Pre-Meal Check-in)
-          </button>
-
-          <button
-            onClick={() => setActiveTab('drift')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'drift' 
-                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
-            }`}
-          >
-            Nutrient Drift & Food Log
-          </button>
-
-          {activeProfile.role === 'homemaker' && (
-            <button
-              onClick={() => setActiveTab('household')}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-                activeTab === 'household' 
-                  ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
-              }`}
+        {/* View Content Viewport Area with Smooth Transition */}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.16 }}
+              className="h-full flex flex-col"
             >
-              Multi-Member Household
-            </button>
-          )}
+              {activeTab === 'plan' && adaptivePlan && (
+                <AdaptivePlanView
+                  profile={activeProfile}
+                  plan={adaptivePlan}
+                  onLogMeal={handleAddLogItem}
+                  flexibilityScale={flexibilityScale}
+                />
+              )}
 
-          <button
-            onClick={() => setActiveTab('market')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'market' 
-                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
-            }`}
-          >
-            Local Mandi Ingredients
-          </button>
+              {activeTab === 'next_meal' && (
+                <PreMealCheckinView
+                  profile={activeProfile}
+                  weeklyLogs={currentLogs}
+                  onLogMeal={handleAddLogItem}
+                  flexibilityScale={flexibilityScale}
+                />
+              )}
 
-          <button
-            onClick={() => setActiveTab('master_prompt')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'master_prompt' 
-                ? 'bg-blue-700 text-white dark:bg-blue-600 shadow-xs' 
-                : 'text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60'
-            }`}
-          >
-            ★ Master Blueprint & PM Review
-          </button>
+              {activeTab === 'drift' && (
+                <NutrientDriftPanel
+                  profile={activeProfile}
+                  weeklyLogs={currentLogs}
+                  driftAnalysis={driftAnalysis}
+                  onAddLogItem={handleAddLogItem}
+                  flexibilityScale={flexibilityScale}
+                />
+              )}
 
-          <button
-            onClick={() => setActiveTab('pm_rules')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-              activeTab === 'pm_rules' 
-                ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs' 
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800'
-            }`}
-          >
-            PM Rule Sandbox
-          </button>
+              {(activeTab === 'household' || activeTab === 'market') && (
+                <HouseholdMandiView profile={activeProfile} />
+              )}
+
+              {(activeTab === 'master_prompt' || activeTab === 'pm_rules') && (
+                <PMBlueprintWorkbenchView
+                  profile={activeProfile}
+                  flexibilityScale={flexibilityScale}
+                  onChangeFlexibility={setFlexibilityScale}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
+      </div>
 
-        {/* View Panels */}
-        {activeTab === 'plan' && adaptivePlan && (
-          <AdaptivePlanView
-            profile={activeProfile}
-            plan={adaptivePlan}
-            onLogMeal={handleAddLogItem}
-            flexibilityScale={flexibilityScale}
-          />
-        )}
-
-        {activeTab === 'next_meal' && (
-          <PreMealCheckinView
-            profile={activeProfile}
-            weeklyLogs={currentLogs}
-            onLogMeal={handleAddLogItem}
-            flexibilityScale={flexibilityScale}
-          />
-        )}
-
-        {activeTab === 'drift' && (
-          <NutrientDriftPanel
-            profile={activeProfile}
-            weeklyLogs={currentLogs}
-            driftAnalysis={driftAnalysis}
-            onAddLogItem={handleAddLogItem}
-            flexibilityScale={flexibilityScale}
-          />
-        )}
-
-        {activeTab === 'household' && (
-          <HouseholdManagerView profile={activeProfile} />
-        )}
-
-        {activeTab === 'market' && (
-          <LocalMarketBoard />
-        )}
-
-        {activeTab === 'master_prompt' && (
-          <MasterPromptView />
-        )}
-
-        {activeTab === 'pm_rules' && (
-          <PMRulesSandbox
-            profile={activeProfile}
-            flexibilityScale={flexibilityScale}
-            onChangeFlexibility={setFlexibilityScale}
-          />
-        )}
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-6 mt-16 text-xs text-slate-500 dark:text-slate-400 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Slim, Quiet Footer */}
+      <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 py-1.5 px-4 sm:px-8 text-[11px] text-slate-500 dark:text-slate-400 transition-colors shrink-0">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-bold text-slate-800 dark:text-slate-200">NutriLocal Studio</span>
             <span>·</span>
             <span>Zero Subscription & Zero Ads</span>
-            <span>·</span>
-            <span>Quick Commerce & Dining Affiliate Supported</span>
+            <span className="hidden sm:inline">· Quick Commerce & Dining Affiliates</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span>Theme: <strong className="capitalize text-slate-800 dark:text-slate-200">{theme}</strong></span>
+          <div className="flex items-center gap-2 font-mono text-[10px]">
+            <span>Score {flexibilityScale}/10</span>
             <span>·</span>
-            <span>Production PM Framework</span>
+            <span className="capitalize">{theme}</span>
           </div>
         </div>
       </footer>
     </div>
   );
 }
+
